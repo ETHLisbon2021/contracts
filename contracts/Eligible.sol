@@ -21,9 +21,9 @@ contract Eligible {
 
     mapping(address => Sale) public sales;
 
-    event Deposited(address indexed tokenAddress, address indexed user);
+    event Deposited(address indexed tokenAddress, address indexed user, uint256  amount);
 
-    event SaleInitiated(address indexed tokenAddress);
+    event SaleInitiated(address indexed tokenAddress, address indexed initiator);
 
     constructor() {
 
@@ -48,7 +48,8 @@ contract Eligible {
             root          : bytes32(0),
             state         : saleState.Active
         });
-        // emit sale inited
+
+        emit SaleInitiated(token, msg.sender);
     }
 
     function distribute(address tokenAddress, bytes32 root) external {
@@ -68,7 +69,7 @@ contract Eligible {
 
         sale.totalDeposits += msg.value;
 
-        emit Deposited(tokenAddress, msg.sender);
+        emit Deposited(tokenAddress, msg.sender, msg.value);
     }
 
     function withdraw(address tokenAddress) external {
