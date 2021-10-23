@@ -16,6 +16,7 @@ contract Eligible is Merkle {
         uint256 distribution;
         bytes32 description;
         bytes32 root;
+        address payable initiator;
         saleState state;
     }
 
@@ -26,6 +27,13 @@ contract Eligible is Merkle {
     event Deposited(address indexed tokenAddress, address indexed user, uint256  amount);
 
     event SaleInitiated(address indexed tokenAddress, address indexed initiator);
+
+    event TokenDistributed(address indexed tokenAddress, bytes32 tree, bytes32 root);
+
+    modifier onlyGuardian() {
+        //  require(msg.sender == guardianDAO, "")
+        _;
+    }
 
     constructor() {
 
@@ -45,11 +53,12 @@ contract Eligible is Merkle {
         sales[token] = Sale({
             totalCap      : totalCap,
             maxDeposit    : maxDeposit,
-            totalDeposits : 0,
+            totalDeposits : uint256(0),
             distribution  : distribution,
             date          : date,
             description   : description,
             root          : bytes32(0),
+            initiator     : payable(msg.sender),
             state         : saleState.Active
         });
 
@@ -58,17 +67,27 @@ contract Eligible is Merkle {
         emit SaleInitiated(token, msg.sender);
     }
 
-    function distribute(address tokenAddress, bytes32 root) external {
+    function distribute(
+        address tokenAddress,
+        bytes32 root,
+        bytes32 tree
+    )
+        external
+        onlyGuardian
+    {
         Sale storage sale = sales[tokenAddress];
         require(sale.state == saleState.Active, "sale does not exist");
+        require(sale.date < block.timestamp, "");
 
         sale.root = root;
         sale.state = saleState.Finished;
 
+        emit TokenDistributed(tokenAddress, tree, root);
     }
 
     function deposit(address tokenAddress, address receiver) external payable {
         Sale storage sale = sales[tokenAddress];
+
         require(sale.state == saleState.Active, "sale does not exist");
         require(msg.value <= sale.maxDeposit, "");
         require(block.timestamp < sale.date, "");
@@ -80,15 +99,16 @@ contract Eligible is Merkle {
         emit Deposited(tokenAddress, receiver, msg.value);
     }
 
-    function withdraw(address tokenAddress) external {
-        //
+    function withdraw(address tokenAddress, address receiver) external {
+        sales[tokenAddress].initiator.transfer(deposits[receiver][tokenAddress]);
     }
 
     function claim(uint256 amount, address receiver, address tokenAddress, bytes memory proof) external {
         bytes32 leaf = keccak256(abi.encodePacked(receiver, amount));
-        require(verifyProof(leaf, sales[tokenAddress].root, proof), "");
+        require(verifyProof(leaf, sales[tokenAddress].root, proof), "The user is not eligible");
 
         IERC20(tokenAddress).transfer(receiver, amount);
-        // sales[initiator].send(deposit);
+        sales[tokenAddress].initiator.transfer(deposits[receiver][tokenAddress]);
     }
 }
+

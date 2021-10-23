@@ -6,25 +6,31 @@
 const hre = require("hardhat");
 
 async function main() {
-    const distribution = hre.ethers.parseUint(100000);
-    const fullCap = hre.ethers.parseUint(20);
-
+    const distribution = hre.ethers.utils.parseUnits("100000");
+    const fullCap = hre.ethers.utils.parseUnits("20");
+    const maxDeposit = hre.ethers.utils.parseUnits("1");
+    const endDate = 1637663818;
+    const description =
+        "0xe0a39fef8aa5887c76606e7a14a5db8dc6676191e4866b2a609a3aa003b18329";
     // We get the contract to deploy
-    const Eligible = await hre.ethers.getContractFactory("Eligible");
-    const eligible = await Eligible.at(process.env.ELIGIBLE);
-    const Token = await hre.ethers.getContractFactory("Token");
-    const token = await Token.at(process.env.TOKEN);
+    const Eligible = await hre.ethers.getContractAt(
+        "Eligible",
+        process.env.ELIGIBLE
+    );
+    const Token = await hre.ethers.getContractAt("Token", process.env.TOKEN);
 
-    token.approve(eligible.address, distribution);
+    Token.approve(Eligible.address, distribution);
 
-    eligible.initSale(
-        token.address,
+    Eligible.initSale(
+        Token.address,
         fullCap,
         distribution,
         maxDeposit,
         endDate,
         description
     );
+
+    console.log("sale inited");
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -25,10 +25,12 @@ async function main() {
     console.log("Eligible deployed to:", eligible.address);
     console.log("Token deployed to:", token.address);
 
-    await hre.run("verify:verify", {
-        address: eligible.address,
-        constructorArguments: [],
-    });
+    if (hre.network.name === "rinkeby") {
+        await hre.run("verify:verify", {
+            address: eligible.address,
+            constructorArguments: [],
+        });
+    }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
