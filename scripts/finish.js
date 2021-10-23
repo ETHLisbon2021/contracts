@@ -6,16 +6,17 @@
 const hre = require("hardhat");
 
 async function main() {
-    const receiver = "0xcd5f8fa45e0ca0937f86006b9ee8fe1eedee5fc4";
+    const root =
+        "0x2b7398568aa25bc9585e004649b390a2304865c016f9d51e988f163dfa2c357e";
+    const tree =
+        "0x2b7398568aa25bc9585e004649b390a2304865c016f9d51e988f163dfa2c357e";
     const Eligible = await hre.ethers.getContractAt(
         "Eligible",
         process.env.ELIGIBLE
     );
     const Token = await hre.ethers.getContractAt("Token", process.env.TOKEN);
 
-    await Eligible.deposit(Token.address, receiver, {
-        value: hre.ethers.utils.parseUnits("1"),
-    });
+    await Eligible.distribute(Token.address, root, tree);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

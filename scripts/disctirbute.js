@@ -6,16 +6,15 @@
 const hre = require("hardhat");
 
 async function main() {
-    const receiver = "0xcd5f8fa45e0ca0937f86006b9ee8fe1eedee5fc4";
+    const receivers = [];
+    const amounts = [1, 2, 3];
     const Eligible = await hre.ethers.getContractAt(
         "Eligible",
         process.env.ELIGIBLE
     );
     const Token = await hre.ethers.getContractAt("Token", process.env.TOKEN);
 
-    await Eligible.deposit(Token.address, receiver, {
-        value: hre.ethers.utils.parseUnits("1"),
-    });
+    await Eligible.distibute(Token.address, receivers, amounts);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
