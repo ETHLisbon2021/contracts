@@ -95,9 +95,9 @@ contract Eligible is Merkle {
         Sale storage sale = sales[tokenAddress];
 
         require(sale.state == saleState.Active, "sale does not exist");
-        require(msg.value <= sale.maxDeposit, "");
-        require(block.timestamp < sale.endingAt, "");
-        require(deposits[receiver][tokenAddress] > 0, "");
+        require(msg.value <= sale.maxDeposit, "Deposit is too high");
+        require(block.timestamp < sale.endingAt, "Sale is over");
+        require(deposits[receiver][tokenAddress] == 0, "User already has a deposit");
 
         sale.totalDeposits += msg.value;
         deposits[receiver][tokenAddress] = msg.value;
