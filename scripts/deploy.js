@@ -17,7 +17,7 @@ async function main() {
     const Eligible = await hre.ethers.getContractFactory("Eligible");
     const eligible = await Eligible.deploy();
     const Token = await hre.ethers.getContractFactory("Token");
-    const token = await Token.deploy();
+    const token = await Token.deploy("Eligible", "ELI");
 
     await eligible.deployed();
     await token.deployed();
