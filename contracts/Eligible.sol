@@ -156,9 +156,16 @@ contract Eligible is Merkle {
     )
         external
     {
+        Sale storage sale = sales[tokenAddress];
+        require(sale.state != saleState.Active, "sale does not exist");
         sales[tokenAddress].initiator.transfer(deposits[receiver][tokenAddress]);
     }
 
+    /// @notice Explain to an end user what this does
+    /// @dev Explain to a developer any extra details
+    /// @param tokenAddress the address of the token to sale
+    /// @param amount the amount of the allocated tokens
+    /// @param receiver the address of receiver
     function claim(
         address tokenAddress,
         uint256 amount,
