@@ -8,7 +8,7 @@ import "hardhat/console.sol";
 
 contract Eligible is Merkle {
 
-    enum saleState {None, Active, Finished, Declined}
+    enum saleState {None, Active, Finished, Closed, Declined}
 
     struct Sale {
         uint256 totalCap;
@@ -31,6 +31,8 @@ contract Eligible is Merkle {
     event SaleInitiated(address indexed tokenAddress, address indexed initiator);
 
     event TokenDistributed(address indexed tokenAddress, bytes32 tree, bytes32 root);
+
+    event StatusChanged(address indexed tokenAddress, saleState indexed newState);
 
     modifier onlyGuardian() {
         //  require(msg.sender == guardianDAO, "")
@@ -89,11 +91,11 @@ contract Eligible is Merkle {
         onlyGuardian
     {
         Sale storage sale = sales[tokenAddress];
-        require(sale.state == saleState.Active, "sale does not exist");
+        require(sale.state == saleState.Finished, "sale does not exist");
         // require(sale.endingAt < block.timestamp, "");
 
         sale.root = root;
-        sale.state = saleState.Finished;
+        sale.state = saleState.Closed;
 
         emit TokenDistributed(tokenAddress, tree, root);
     }
@@ -108,6 +110,7 @@ contract Eligible is Merkle {
         uint256[] calldata amounts
     )
         external
+        onlyGuardian
     {
         Sale storage sale = sales[tokenAddress];
         require(receivers.length == amounts.length, "");
@@ -121,7 +124,20 @@ contract Eligible is Merkle {
 
         sales[tokenAddress].initiator.transfer(sum);
 
-        sale.state = saleState.Finished;
+        sale.state = saleState.Closed;
+    }
+
+    function stopWhitelist(
+        address tokenAddress
+    )
+        external
+    {
+        require(msg.sender == sales[tokenAddress].initiator, "Sender is not a owner");
+        require(sales[tokenAddress].state == saleState.Active, "The sale has wrong state");
+
+        sales[tokenAddress].state = saleState.Finished;
+
+        emit StatusChanged(tokenAddress, saleState.Finished);
     }
 
     /// @notice Deposites funds for the tokensale
