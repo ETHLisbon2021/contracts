@@ -2,7 +2,7 @@
 
 The Eligible smart contract allows to set up the tokensale, receive user's deposits and distirbute tokens based on the provided information.
 
-![sheme](https://github.com/ETHLisbon2021/contracts/img.png)
+![sheme](https://github.com/ETHLisbon2021/contracts/blob/main/img.png)
 
 ## Launching the sale
 
