@@ -1,4 +1,4 @@
-# Eligble
+# Eligible contract
 
 The Eligible smart contract allows to set up the tokensale, receive user's deposits and distirbute tokens based on the provided information.
 
